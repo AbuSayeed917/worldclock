@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Tokens — the vocabulary every other stylesheet speaks.
+
+   Layer order is declared once, here, and never repeated. Everything after this
+   point lands in a named layer, which means specificity conflicts resolve by
+   layer precedence instead of by accidental selector weight. It is the reason
+   a `.strip` rule and a `.card` rule can both set padding without one silently
+   cancelling the other.
+   ========================================================================== */
+
+@layer reset, tokens, base, layout, components, motion, utilities;
+
+/* --------------------------------------------------------------------------
+   Registered custom properties.
+
+   A plain custom property is an unparsed string, so the browser cannot animate
+   between two values — `--sky-top: navy` to `--sky-top: peach` snaps. Declaring
+   the syntax makes it a real typed value that participates in interpolation,
+   which is what turns the day/night palette into an actual transition.
+   -------------------------------------------------------------------------- */
+
+@property --sky-top {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: oklch(0.19 0.07 272);
+}
+@property --sky-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: oklch(0.24 0.1 280);
+}
+@property --sky-low {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: oklch(0.31 0.11 295);
+}
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: oklch(0.75 0.14 275);
+}
+@property --glow {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: oklch(0.45 0.09 285);
+}
+@property --ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: oklch(0.17 0.03 270);
+}
+@property --star-opacity {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.8;
+}
+@property --sun-opacity {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --sweep {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@layer tokens {
+  :root {
+    /* --- Type ------------------------------------------------------------ */
+
+    /* Display: Bricolage Grotesque has optical-size and width axes, so the same
+       family covers a poster headline and a small eyebrow without a second file. */
+    --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+
+    /* Body: the platform stack. On Apple hardware this resolves to SF Pro — the
+       genuine article rather than an imitation of it. */
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+    /* Data: a clock is a number that changes 60 times a minute. Tabular figures
+       are mandatory or every digit change shifts the layout. */
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --step--2: clamp(0.69rem, 0.66rem + 0.15vw, 0.78rem);
+    --step--1: clamp(0.83rem, 0.79rem + 0.2vw, 0.94rem);
+    --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.13rem);
+    --step-1: clamp(1.2rem, 1.13rem + 0.36vw, 1.42rem);
+    --step-2: clamp(1.44rem, 1.34rem + 0.52vw, 1.78rem);
+    --step-3: clamp(1.73rem, 1.58rem + 0.74vw, 2.22rem);
+    --step-4: clamp(2.07rem, 1.86rem + 1.05vw, 2.78rem);
+    --step-5: clamp(2.49rem, 2.19rem + 1.48vw, 3.47rem);
+    --step-6: clamp(2.99rem, 2.57rem + 2.06vw, 4.34rem);
+    --step-7: clamp(3.58rem, 3.02rem + 2.83vw, 5.42rem);
+
+    /* --- Surfaces -------------------------------------------------------- */
+
+    /* The page chrome stays deep and quiet whatever the sun is doing. Letting the
+       whole page track daylight would wreck text contrast at noon; the sky
+       surfaces carry the colour instead, and they never hold body copy. */
+    --surface-0: oklch(from var(--ink) calc(l * 0.72) c h);
+    --surface-1: oklch(from var(--ink) calc(l * 1.06) calc(c * 1.1) h);
+    --surface-2: oklch(from var(--ink) calc(l * 1.32) calc(c * 1.2) h);
+    --surface-3: oklch(from var(--ink) calc(l * 1.62) calc(c * 1.25) h);
+
+    --outline: oklch(from var(--ink) calc(l * 2.1) calc(c * 1.1) h / 0.42);
+    --outline-strong: oklch(from var(--ink) calc(l * 3) calc(c * 1.2) h / 0.7);
+
+    --text: oklch(0.97 0.008 268);
+    --text-dim: oklch(0.78 0.018 268);
+    --text-faint: oklch(0.62 0.022 268);
+
+    --on-accent: oklch(0.16 0.03 270);
+
+    /* Night wash used over the map. */
+    --night-tint: oklch(0.14 0.055 268);
+    --night-edge-tint: oklch(0.45 0.14 320);
+
+    /* --- Shape ----------------------------------------------------------- */
+
+    /* Material 3's shape scale, which is where the Google half of the brief
+       shows up most plainly — generous, consistent, pill-ended. */
+    --r-xs: 0.5rem;
+    --r-sm: 0.75rem;
+    --r-md: 1.125rem;
+    --r-lg: 1.75rem;
+    --r-xl: 2.25rem;
+    --r-full: 999rem;
+
+    /* --- Space ----------------------------------------------------------- */
+    --space-3xs: 0.25rem;
+    --space-2xs: 0.5rem;
+    --space-xs: 0.75rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2.25rem;
+    --space-xl: 3.5rem;
+    --space-2xl: 5.5rem;
+    --space-3xl: 8rem;
+
+    --measure: 62ch;
+    --shell: min(100% - 2.5rem, 78rem);
+
+    /* --- Motion ---------------------------------------------------------- */
+
+    /* Two easing families, deliberately. Apple's spring for things the user
+       directly manipulates, Material's emphasised-decelerate for things the
+       system announces. Mixing them at random is what makes motion feel unowned. */
+    --ease-spring: linear(
+      0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.5%,
+      0.937 38.1%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%,
+      1.001
+    );
+    --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+    --dur-fast: 180ms;
+    --dur-base: 320ms;
+    --dur-slow: 620ms;
+    /* The sky is not a UI transition; it should feel like weather. */
+    --dur-sky: 2400ms;
+
+    /* --- Elevation ------------------------------------------------------- */
+    --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3), 0 2px 6px oklch(0 0 0 / 0.18);
+    --shadow-md: 0 2px 6px oklch(0 0 0 / 0.28), 0 12px 28px oklch(0 0 0 / 0.28);
+    --shadow-lg: 0 4px 12px oklch(0 0 0 / 0.3), 0 28px 64px oklch(0 0 0 / 0.36);
+    --shadow-glow: 0 0 0 1px oklch(from var(--accent) l c h / 0.28),
+      0 8px 40px oklch(from var(--accent) l c h / 0.22);
+  }
+}

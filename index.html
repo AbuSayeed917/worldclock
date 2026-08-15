@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Meridian — world time, lit by the real sun</title>
+    <meta
+      name="description"
+      content="A live world clock. Every city carries its own sky, computed from the real position of the sun, and a draggable terminator map shows exactly who is in daylight right now."
+    />
+    <meta name="theme-color" content="#12162b" />
+    <meta name="color-scheme" content="dark" />
+
+    <meta property="og:title" content="Meridian — world time, lit by the real sun" />
+    <meta
+      property="og:description"
+      content="Live world clocks with real sunrise, sunset and a draggable day/night map."
+    />
+    <meta property="og:type" content="website" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=JetBrains+Mono:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%2312162b' stroke='%23f5a93f' stroke-width='2'/%3E%3Cpath d='M16 8v8l5 3' stroke='%23f5a93f' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#cities">Skip to clocks</a>
+
+    <div class="shell">
+      <header class="nav">
+        <span class="brand">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.45" />
+            <ellipse cx="16" cy="16" rx="5.4" ry="13" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.32" />
+            <line x1="3" y1="16" x2="29" y2="16" stroke="currentColor" stroke-width="1.3" opacity="0.32" />
+            <path d="M16 8.5V16l5 2.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+          </svg>
+          Meridian
+        </span>
+
+        <div class="search" data-role="search">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <input
+            class="search-input"
+            type="search"
+            placeholder="Add a city…"
+            aria-label="Search for a city to add"
+            autocomplete="off"
+            spellcheck="false"
+            data-role="search-input"
+          />
+          <ul class="search-results" data-role="search-results" role="listbox" aria-label="City results"></ul>
+        </div>
+
+        <span class="nav-spacer"></span>
+
+        <span class="nav-clock">
+          <span data-role="nav-zone"></span>
+          <b data-role="nav-time">--:--:--</b>
+        </span>
+      </header>
+
+      <!-- ============================ HERO ============================ -->
+      <section class="hero" aria-labelledby="hero-city">
+        <div class="hero-sky"></div>
+        <canvas class="hero-stars" data-role="stars" aria-hidden="true"></canvas>
+        <div class="hero-stage" data-role="hero-stage"></div>
+
+        <div class="hero-body">
+          <div>
+            <p class="hero-place">
+              <span data-role="hero-place">Locating…</span>
+              <span class="chip chip-accent">
+                <span class="chip-dot"></span>
+                <span data-role="hero-phase">—</span>
+              </span>
+            </p>
+
+            <h1 class="hero-time" id="hero-city">
+              <span data-role="hero-hm">--:--</span><span class="hero-seconds" data-role="hero-s">--</span>
+            </h1>
+
+            <p class="hero-date" data-role="hero-date">—</p>
+
+            <div class="hero-phase">
+              <span class="chip">Sunrise <b data-role="hero-sunrise">—</b></span>
+              <span class="chip">Sunset <b data-role="hero-sunset">—</b></span>
+              <span class="chip">Offset <b data-role="hero-offset">—</b></span>
+            </div>
+          </div>
+
+          <div class="hero-dial" data-role="hero-dial"></div>
+        </div>
+      </section>
+
+      <!-- ========================= TERMINATOR ========================= -->
+      <section class="section" aria-labelledby="strip-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Right now on Earth</p>
+            <h2 class="section-title" id="strip-title">The line between today and tonight</h2>
+          </div>
+          <p class="section-note">
+            The boundary is a great circle. Flattened onto this map it becomes a wave whose
+            height is the season and whose position is the hour.
+          </p>
+        </div>
+
+        <div data-role="strip"></div>
+
+        <div class="strip-controls">
+          <button class="btn btn-accent" type="button" data-role="reset-time">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7Z" fill="currentColor" />
+            </svg>
+            Back to now
+          </button>
+          <p class="offset-readout" data-role="offset-readout">Showing the present moment</p>
+        </div>
+      </section>
+
+      <!-- =========================== CITIES =========================== -->
+      <section class="section" id="cities" aria-labelledby="cities-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Your clocks</p>
+            <h2 class="section-title" id="cities-title">Pinned cities</h2>
+          </div>
+          <p class="section-note">
+            Each card is lit by its own sun. Search above to add a city; they stay put between
+            visits.
+          </p>
+        </div>
+
+        <div class="grid" data-role="grid"></div>
+      </section>
+
+      <!-- ============================ RAIL ============================ -->
+      <section class="section" aria-labelledby="rail-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Around the clock</p>
+            <h2 class="section-title" id="rail-title">Somewhere, it is always this hour</h2>
+          </div>
+        </div>
+      </section>
+
+      <div class="rail" data-role="rail"></div>
+
+      <!-- ========================= CONVERTER ========================== -->
+      <section class="section" aria-labelledby="converter-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Plan across zones</p>
+            <h2 class="section-title" id="converter-title">Pick a time, see it everywhere</h2>
+          </div>
+        </div>
+
+        <div class="converter">
+          <div class="converter-controls">
+            <label class="field">
+              <span class="field-label">In this city</span>
+              <select class="field-control" data-role="conv-city"></select>
+            </label>
+            <label class="field">
+              <span class="field-label">At this time</span>
+              <input class="field-control" type="time" data-role="conv-time" />
+            </label>
+            <label class="field">
+              <span class="field-label">On this date</span>
+              <input class="field-control" type="date" data-role="conv-date" />
+            </label>
+          </div>
+
+          <ul class="converter-list" data-role="conv-list"></ul>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>
+          Sun positions from the NOAA solar algorithm. Coastlines from
+          <a href="https://www.naturalearthdata.com/" rel="noopener">Natural Earth</a> (public
+          domain).
+        </p>
+        <p>
+          <a href="https://github.com/AbuSayeed917/worldclock" rel="noopener">Source on GitHub</a>
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

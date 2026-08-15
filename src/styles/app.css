@@ -1,0 +1,1442 @@
+/* ==========================================================================
+   Application styles. Every rule lives in a layer declared in tokens.css.
+   ========================================================================== */
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100svh;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  img,
+  svg,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  button,
+  input {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: var(--r-xs);
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer base {
+  body {
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    color: var(--text);
+    background: var(--surface-0);
+    /* The one place the whole page acknowledges the sun: a wash of the current
+       sky colour bleeding up from behind the content. */
+    background-image: radial-gradient(
+      120% 60% at 50% 0%,
+      oklch(from var(--sky-mid) l c h / 0.28) 0%,
+      transparent 62%
+    );
+    background-attachment: fixed;
+    transition: background-color var(--dur-sky) var(--ease-emphasized);
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    font-variation-settings: 'opsz' 48, 'wdth' 100;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: var(--accent);
+    text-underline-offset: 0.2em;
+  }
+
+  ::selection {
+    background: oklch(from var(--accent) l c h / 0.35);
+  }
+}
+
+@layer layout {
+  .shell {
+    width: var(--shell);
+    margin-inline: auto;
+  }
+
+  .section {
+    padding-block: var(--space-2xl);
+  }
+
+  .section-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-block-end: var(--space-lg);
+    flex-wrap: wrap;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .eyebrow::before {
+    content: '';
+    inline-size: 1.75rem;
+    block-size: 1px;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .section-title {
+    font-size: var(--step-4);
+    margin-block-start: var(--space-2xs);
+  }
+
+  .section-note {
+    color: var(--text-faint);
+    font-size: var(--step--1);
+    max-inline-size: 34ch;
+  }
+}
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+
+@layer components {
+  /* --- Navigation ------------------------------------------------------- */
+
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-xs) var(--space-md);
+    margin-block-start: var(--space-sm);
+    border-radius: var(--r-full);
+    border: 1px solid var(--outline);
+    /* Apple's translucent material. The saturate() is what keeps colour behind
+       the bar from going grey — plain blur alone reads as frosted plastic. */
+    background: oklch(from var(--surface-1) l c h / 0.72);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-0);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .brand-mark {
+    inline-size: 1.6rem;
+    block-size: 1.6rem;
+    flex: none;
+  }
+
+  .nav-spacer {
+    flex: 1;
+  }
+
+  .nav-clock {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--step--1);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    white-space: nowrap;
+  }
+
+  .nav-clock b {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  @media (width < 40rem) {
+    .nav-clock span[data-role='nav-zone'] {
+      display: none;
+    }
+  }
+
+  /* --- Search ----------------------------------------------------------- */
+
+  .search {
+    position: relative;
+    flex: 0 1 20rem;
+  }
+
+  .search-input {
+    inline-size: 100%;
+    padding: 0.55rem 0.9rem 0.55rem 2.3rem;
+    border-radius: var(--r-full);
+    border: 1px solid var(--outline);
+    background: oklch(from var(--surface-2) l c h / 0.7);
+    color: var(--text);
+    font-size: var(--step--1);
+    transition: border-color var(--dur-fast) var(--ease-emphasized),
+      background-color var(--dur-fast) var(--ease-emphasized);
+  }
+
+  .search-input::placeholder {
+    color: var(--text-faint);
+  }
+
+  .search-input:focus {
+    border-color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  .search-icon {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0.8rem;
+    translate: 0 -50%;
+    inline-size: 1rem;
+    block-size: 1rem;
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+
+  .search-results {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(100% + 0.5rem);
+    padding: var(--space-3xs);
+    border-radius: var(--r-md);
+    border: 1px solid var(--outline);
+    background: oklch(from var(--surface-1) l c h / 0.92);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow: var(--shadow-lg);
+    list-style: none;
+    padding-inline-start: var(--space-3xs);
+    max-block-size: 21rem;
+    overflow-y: auto;
+    display: none;
+  }
+
+  /* :has() lets the container react to its own contents without a JS class
+     toggle — the dropdown is open precisely when it has something to show. */
+  .search:has(.search-results li) .search-results {
+    display: block;
+  }
+
+  .search-result {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    inline-size: 100%;
+    padding: 0.5rem 0.6rem;
+    border-radius: var(--r-sm);
+    text-align: start;
+    transition: background-color var(--dur-fast) var(--ease-emphasized);
+  }
+
+  .search-result:hover,
+  .search-result:focus-visible {
+    background: var(--surface-3);
+  }
+
+  .search-result-name {
+    font-weight: 550;
+  }
+
+  .search-result-meta {
+    margin-inline-start: auto;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .search-result[data-pinned='true'] .search-result-name::after {
+    content: 'Pinned';
+    margin-inline-start: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* --- Hero ------------------------------------------------------------- */
+
+  .hero {
+    position: relative;
+    margin-block-start: var(--space-lg);
+    border-radius: var(--r-xl);
+    overflow: clip;
+    isolation: isolate;
+    border: 1px solid var(--outline);
+    box-shadow: var(--shadow-lg);
+    min-block-size: min(66svh, 34rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    align-content: end;
+  }
+
+  .hero-sky {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background: linear-gradient(
+      180deg,
+      var(--sky-top) 0%,
+      var(--sky-mid) 52%,
+      var(--sky-low) 100%
+    );
+    transition: --sky-top var(--dur-sky) var(--ease-emphasized),
+      --sky-mid var(--dur-sky) var(--ease-emphasized),
+      --sky-low var(--dur-sky) var(--ease-emphasized);
+  }
+
+  .hero-stars {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    opacity: var(--star-opacity);
+    transition: opacity var(--dur-sky) var(--ease-emphasized);
+    pointer-events: none;
+  }
+
+  /* The sun and moon live inside the Lottie scene, not in CSS. Having both
+     produced two suns in the sky at once during daylight. */
+
+  /* A ground scrim so the headline never sits on raw sky. */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      transparent 30%,
+      oklch(from var(--surface-0) l c h / 0.55) 68%,
+      oklch(from var(--surface-0) l c h / 0.92) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Sits at z-index 0, not -1. A negative z-index would drop it behind the
+     hero's own painted background and behind the ::after scrim; at 0 it layers
+     above the sky and below .hero-body, which is what the composition wants. */
+  .hero-stage {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    block-size: 76%;
+    z-index: 0;
+    opacity: 0.94;
+    pointer-events: none;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 100%);
+  }
+
+  .hero-body {
+    position: relative;
+    padding: var(--space-xl) var(--space-lg);
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .hero-place {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    flex-wrap: wrap;
+  }
+
+  .hero-time {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: var(--step-7);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+    margin-block: var(--space-2xs) var(--space-3xs);
+    display: flex;
+    align-items: baseline;
+    gap: 0.1em;
+  }
+
+  .hero-seconds {
+    font-size: 0.42em;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    transition: color var(--dur-sky) var(--ease-emphasized);
+  }
+
+  .hero-date {
+    font-size: var(--step-1);
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  .hero-phase {
+    margin-block-start: var(--space-sm);
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .hero-dial {
+    inline-size: clamp(7rem, 16vw, 11rem);
+  }
+
+  /* Once the dial appears, pull the scene's right edge in so the figures do not
+     end up standing behind it. */
+  @media (width >= 52rem) {
+    .hero-stage {
+      inset-inline-end: clamp(9rem, 18vw, 14rem);
+    }
+  }
+
+  @media (width < 52rem) {
+    .hero-body {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .hero-dial {
+      display: none;
+    }
+
+    .hero {
+      min-block-size: min(70svh, 34rem);
+    }
+  }
+
+  /* --- Chips ------------------------------------------------------------ */
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.34rem 0.8rem;
+    border-radius: var(--r-full);
+    border: 1px solid var(--outline);
+    background: oklch(from var(--surface-2) l c h / 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-size: var(--step--2);
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .chip b {
+    color: var(--text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chip-accent {
+    border-color: oklch(from var(--accent) l c h / 0.5);
+    color: var(--accent);
+  }
+
+  .chip-dot {
+    inline-size: 0.45rem;
+    block-size: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* --- Terminator strip (the signature) --------------------------------- */
+
+  .strip {
+    margin: 0;
+    border-radius: var(--r-lg);
+    overflow: clip;
+    border: 1px solid var(--outline);
+    background: var(--surface-1);
+    box-shadow: var(--shadow-md);
+  }
+
+  .strip-map {
+    inline-size: 100%;
+    block-size: auto;
+    display: block;
+    cursor: grab;
+    touch-action: pan-y;
+    background: oklch(0.22 0.05 250);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .strip-map.is-dragging {
+    cursor: grabbing;
+  }
+
+  .strip-ocean {
+    fill: oklch(0.28 0.06 246);
+  }
+
+  .strip-land {
+    fill: oklch(0.44 0.055 168);
+    fill-rule: evenodd;
+  }
+
+  .strip-graticule line {
+    stroke: oklch(1 0 0 / 0.07);
+    stroke-width: 0.35;
+  }
+
+  .strip-graticule .equator {
+    stroke: oklch(1 0 0 / 0.16);
+    stroke-width: 0.5;
+    stroke-dasharray: 3 2.5;
+  }
+
+  .strip-night-fill {
+    fill: url(#nightGradient);
+    filter: url(#terminatorBlur);
+  }
+
+  .strip-night-edge {
+    fill: none;
+    stroke: oklch(0.72 0.16 44 / 0.7);
+    stroke-width: 0.7;
+  }
+
+  .strip-sun-glow {
+    fill: oklch(0.85 0.16 78 / 0.28);
+  }
+
+  .strip-sun-core {
+    fill: oklch(0.93 0.15 88);
+  }
+
+  .strip-moon-glow {
+    fill: oklch(0.75 0.09 285 / 0.18);
+  }
+
+  .strip-moon-core {
+    fill: oklch(0.92 0.03 260 / 0.85);
+  }
+
+  .pin-halo {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 0.7;
+    opacity: 0.55;
+  }
+
+  .pin-dot {
+    fill: currentColor;
+  }
+
+  .pin-lit {
+    color: oklch(0.9 0.15 88);
+  }
+
+  .pin-dark {
+    color: oklch(0.8 0.1 300);
+  }
+
+  .pin-label {
+    font-family: var(--font-mono);
+    font-size: 4.4px;
+    font-weight: 600;
+    fill: oklch(0.98 0 0);
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: oklch(0.15 0.04 265 / 0.85);
+    stroke-width: 1.4px;
+    stroke-linejoin: round;
+    letter-spacing: 0.02em;
+  }
+
+  .pin-interactive {
+    cursor: pointer;
+  }
+
+  .strip-caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-md);
+    border-block-start: 1px solid var(--outline);
+    font-size: var(--step--2);
+    color: var(--text-faint);
+    flex-wrap: wrap;
+  }
+
+  .strip-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .strip-hint-icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+    opacity: 0.7;
+  }
+
+  .strip-readout {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .strip-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-block-start: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .offset-readout {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--step--1);
+    color: var(--text-dim);
+  }
+
+  .offset-readout b {
+    color: var(--accent);
+  }
+
+  /* --- Buttons ---------------------------------------------------------- */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1.1rem;
+    border-radius: var(--r-full);
+    border: 1px solid var(--outline);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: var(--step--1);
+    font-weight: 550;
+    transition: background-color var(--dur-fast) var(--ease-emphasized),
+      border-color var(--dur-fast) var(--ease-emphasized),
+      scale var(--dur-fast) var(--ease-spring);
+  }
+
+  .btn:hover {
+    background: var(--surface-3);
+    border-color: var(--outline-strong);
+  }
+
+  .btn:active {
+    scale: 0.97;
+  }
+
+  .btn-accent {
+    background: var(--accent);
+    border-color: transparent;
+    color: var(--on-accent);
+    font-weight: 650;
+    transition: background-color var(--dur-sky) var(--ease-emphasized),
+      scale var(--dur-fast) var(--ease-spring);
+  }
+
+  .btn-accent:hover {
+    background: oklch(from var(--accent) calc(l * 1.08) c h);
+    border-color: transparent;
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* --- City grid -------------------------------------------------------- */
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr));
+    gap: var(--space-sm);
+  }
+
+  .card {
+    display: flex;
+    position: relative;
+    container-type: inline-size;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--outline);
+    background: var(--surface-1);
+    overflow: clip;
+    isolation: isolate;
+    box-shadow: var(--shadow-sm);
+    transition: translate var(--dur-base) var(--ease-spring),
+      box-shadow var(--dur-base) var(--ease-emphasized),
+      border-color var(--dur-base) var(--ease-emphasized);
+  }
+
+  .card:hover {
+    translate: 0 -4px;
+    box-shadow: var(--shadow-md);
+    border-color: var(--outline-strong);
+  }
+
+  /* Each card carries its own sky, coloured by that city's own sun. This is
+     where the solar model pays for itself: at 3am in Tokyo the card is genuinely
+     dark while the Los Angeles card beside it is mid-afternoon blue. */
+  .card-sky {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 0;
+    block-size: 6.5rem;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      var(--card-top) 0%,
+      var(--card-mid) 60%,
+      transparent 100%
+    );
+    opacity: 0.85;
+  }
+
+  .card-body {
+    padding: var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    block-size: 100%;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-2xs);
+  }
+
+  /* The card header sits directly on the sky, which ranges from near-black at
+     midnight to a bright noon blue. A fixed dim grey is unreadable at one end of
+     that range, so the header text is near-white with a shadow instead — legible
+     against every sky the solar model can produce. */
+  .card-name {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    text-shadow: 0 1px 3px oklch(0 0 0 / 0.45);
+  }
+
+  .card-country {
+    font-size: var(--step--2);
+    color: oklch(1 0 0 / 0.74);
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 3px oklch(0 0 0 / 0.5);
+  }
+
+  .card-remove {
+    inline-size: 1.85rem;
+    block-size: 1.85rem;
+    flex: none;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--text-faint);
+    background: oklch(from var(--surface-2) l c h / 0.55);
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-emphasized),
+      background-color var(--dur-fast) var(--ease-emphasized),
+      color var(--dur-fast) var(--ease-emphasized);
+  }
+
+  .card:hover .card-remove,
+  .card:focus-within .card-remove {
+    opacity: 1;
+  }
+
+  .card-remove:hover {
+    background: oklch(0.55 0.19 22 / 0.24);
+    color: oklch(0.82 0.16 22);
+  }
+
+  .card-remove svg {
+    inline-size: 0.9rem;
+    block-size: 0.9rem;
+  }
+
+  .card-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    margin-block-start: var(--space-2xs);
+  }
+
+  .card-time {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--step-4);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .card-time small {
+    font-size: 0.44em;
+    font-weight: 500;
+    color: var(--text-faint);
+    margin-inline-start: 0.15em;
+    letter-spacing: 0;
+  }
+
+  .card-dial {
+    inline-size: 3.6rem;
+    flex: none;
+  }
+
+  /* Container queries let a card adapt to the column it landed in rather than to
+     the viewport — the same card works in a 4-up grid and in a sidebar. */
+  @container (inline-size < 15rem) {
+    .card-dial {
+      display: none;
+    }
+
+    .card-time {
+      font-size: var(--step-3);
+    }
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    flex-wrap: wrap;
+    margin-block-start: auto;
+    padding-block-start: var(--space-2xs);
+    border-block-start: 1px solid var(--outline);
+    font-size: var(--step--2);
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+
+  .card-daymark {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .card-sun {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-inline-start: auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-sun svg {
+    inline-size: 0.8rem;
+    block-size: 0.8rem;
+    opacity: 0.75;
+  }
+
+  /* Sun arc: a small track with the sun's position along today's daylight. */
+  .card-arc {
+    position: relative;
+    block-size: 2.6rem;
+    margin-block-start: var(--space-2xs);
+  }
+
+  .card-arc svg {
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+  }
+
+  .arc-track {
+    fill: none;
+    stroke: var(--outline-strong);
+    stroke-width: 1.4;
+    stroke-dasharray: 2 3;
+    stroke-linecap: round;
+  }
+
+  .arc-progress {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    transition: stroke var(--dur-sky) var(--ease-emphasized);
+  }
+
+  .arc-marker {
+    fill: var(--accent);
+    transition: fill var(--dur-sky) var(--ease-emphasized);
+  }
+
+  .arc-horizon {
+    stroke: var(--outline);
+    stroke-width: 1;
+  }
+
+  /* --- Analog dial ------------------------------------------------------ */
+
+  .dial {
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 1;
+    filter: drop-shadow(0 6px 16px oklch(0 0 0 / 0.35));
+  }
+
+  .dial-face {
+    fill: oklch(from var(--surface-2) l c h / 0.82);
+    stroke: var(--outline-strong);
+    stroke-width: 0.8;
+  }
+
+  .tick {
+    fill: var(--text-faint);
+  }
+
+  .tick-hour {
+    fill: var(--text-dim);
+  }
+
+  .hand rect,
+  .hand circle {
+    fill: var(--text);
+  }
+
+  .hand-second rect,
+  .hand-second circle {
+    fill: var(--accent);
+    transition: fill var(--dur-sky) var(--ease-emphasized);
+  }
+
+  .dial-pivot {
+    fill: var(--surface-0);
+    stroke: var(--text);
+    stroke-width: 1.2;
+  }
+
+  /* --- Today rail (App Store editorial cards) --------------------------- */
+
+  .rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(85%, 27rem);
+    gap: var(--space-sm);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-md);
+    padding-block-end: var(--space-sm);
+    /* Bleed the rail to the viewport edges so cards run off-screen the way a
+       Today tab does, while the first card still lines up with the grid. */
+    margin-inline: calc(50% - 50vw);
+    padding-inline: max(var(--space-md), calc(50vw - var(--shell) / 2));
+    scrollbar-width: none;
+  }
+
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rail-card {
+    scroll-snap-align: start;
+    position: relative;
+    border-radius: var(--r-xl);
+    overflow: clip;
+    isolation: isolate;
+    border: 1px solid var(--outline);
+    min-block-size: 24rem;
+    display: grid;
+    align-content: space-between;
+    padding: var(--space-md);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(170deg, var(--card-a), var(--card-b));
+    transition: scale var(--dur-base) var(--ease-spring);
+  }
+
+  .rail-card:hover {
+    scale: 1.012;
+  }
+
+  /* Same rule as the hero stage: a negative z-index would put this behind the
+     card's own gradient background and render it invisible. */
+  .rail-stage {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    block-size: 68%;
+    z-index: 0;
+    opacity: 0.97;
+    pointer-events: none;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 100%);
+  }
+
+  /* Lift the copy above the animation. Without this the stage, being the only
+     positioned child, would paint over the text. */
+  .rail-card > :not(.rail-stage) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* A scrim behind the text block only, so white copy stays legible over
+     whatever part of the scene ends up underneath it. */
+  .rail-card > :not(.rail-stage):last-child::before {
+    content: '';
+    position: absolute;
+    inset: -40% -30% -60% -30%;
+    z-index: -1;
+    background: radial-gradient(60% 100% at 20% 60%, oklch(0 0 0 / 0.45), transparent 70%);
+    pointer-events: none;
+  }
+
+  .rail-eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: oklch(1 0 0 / 0.72);
+  }
+
+  .rail-title {
+    font-size: var(--step-3);
+    margin-block-start: var(--space-3xs);
+    max-inline-size: 16ch;
+    color: oklch(1 0 0 / 0.98);
+  }
+
+  .rail-copy {
+    font-size: var(--step--1);
+    color: oklch(1 0 0 / 0.78);
+    max-inline-size: 30ch;
+    margin-block-start: var(--space-2xs);
+  }
+
+  .rail-foot {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    color: oklch(1 0 0 / 0.86);
+    background: oklch(0 0 0 / 0.28);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--r-full);
+    justify-self: start;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- Lottie stage ----------------------------------------------------- */
+
+  /* Wrapped in :where() so these carry zero specificity. They are defaults, not
+     declarations: .hero-stage and .rail-stage reposition the same element, and
+     without this the generic rule wins purely by being later in the file — the
+     bug that left every Lottie scene stuck in the corner of its card. */
+  :where(.stage) {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: clip;
+  }
+
+  .stage svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .stage-fallback {
+    position: absolute;
+    inset: 0;
+    transition: opacity var(--dur-slow) var(--ease-emphasized);
+  }
+
+  /* Once the real animation reports DOMLoaded the stand-in fades out. Until
+     then — and forever, if the load fails — the fallback is what you see. */
+  .stage.is-ready .stage-fallback {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .fb-sky {
+    position: absolute;
+    inset: 0;
+    overflow: clip;
+  }
+
+  .fb-orb {
+    position: absolute;
+    inset-inline-start: 62%;
+    inset-block-start: 18%;
+    inline-size: 22%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow) 30%, transparent 70%);
+    opacity: 0.85;
+  }
+
+  .fb-cloud {
+    position: absolute;
+    block-size: 14%;
+    inline-size: 34%;
+    border-radius: var(--r-full);
+    background: oklch(1 0 0 / 0.16);
+    filter: blur(6px);
+  }
+
+  .fb-cloud-a {
+    inset-inline-start: 8%;
+    inset-block-start: 30%;
+  }
+
+  .fb-cloud-b {
+    inset-inline-start: 46%;
+    inset-block-start: 46%;
+    inline-size: 26%;
+    opacity: 0.7;
+  }
+
+  .fb-horizon {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 34%;
+    background: linear-gradient(180deg, transparent, oklch(0 0 0 / 0.35));
+  }
+
+  /* --- Converter -------------------------------------------------------- */
+
+  .converter {
+    border-radius: var(--r-lg);
+    border: 1px solid var(--outline);
+    background: var(--surface-1);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .converter-controls {
+    display: flex;
+    align-items: end;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-block-end: var(--space-md);
+  }
+
+  .field {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .field-label {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .field-control {
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--outline);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: var(--step-0);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    min-inline-size: 9rem;
+  }
+
+  select.field-control {
+    font-family: var(--font-body);
+    cursor: pointer;
+  }
+
+  .converter-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .converter-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-2xs) var(--space-xs);
+    border-radius: var(--r-sm);
+    background: oklch(from var(--surface-2) l c h / 0.5);
+    transition: background-color var(--dur-fast) var(--ease-emphasized);
+  }
+
+  .converter-row:hover {
+    background: var(--surface-2);
+  }
+
+  .converter-city {
+    font-weight: 550;
+  }
+
+  .converter-zone {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    color: var(--text-faint);
+  }
+
+  .converter-time {
+    margin-inline-start: auto;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--step-1);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+
+  .converter-day {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    color: var(--accent);
+    min-inline-size: 4.5rem;
+    text-align: end;
+  }
+
+  /* --- Empty state ------------------------------------------------------ */
+
+  .empty {
+    grid-column: 1 / -1;
+    padding: var(--space-xl);
+    border-radius: var(--r-lg);
+    border: 1px dashed var(--outline-strong);
+    text-align: center;
+    color: var(--text-faint);
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: center;
+  }
+
+  .empty h3 {
+    font-size: var(--step-2);
+    color: var(--text);
+  }
+
+  /* --- Footer ----------------------------------------------------------- */
+
+  .footer {
+    padding-block: var(--space-xl) var(--space-lg);
+    margin-block-start: var(--space-xl);
+    border-block-start: 1px solid var(--outline);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    font-size: var(--step--2);
+    color: var(--text-faint);
+  }
+
+  .footer a {
+    color: var(--text-dim);
+    text-decoration-color: var(--outline-strong);
+  }
+
+  .footer a:hover {
+    color: var(--accent);
+  }
+}
+
+/* ==========================================================================
+   Motion
+   ========================================================================== */
+
+@layer motion {
+  /* Scroll-driven reveals with no JavaScript and no IntersectionObserver. The
+     animation's timeline *is* the element's progress through the viewport, so
+     it scrubs with the scroll rather than firing once at a threshold. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        animation: reveal linear both;
+        animation-timeline: view();
+        animation-range: entry 5% cover 26%;
+      }
+    }
+  }
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      translate: 0 2rem;
+      scale: 0.985;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+      scale: 1;
+    }
+  }
+
+  /* Page-load sequence for the hero. Deliberately short and staggered — one
+     orchestrated moment rather than everything sliding in at once. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-place,
+    .hero-time,
+    .hero-date,
+    .hero-phase,
+    .hero-dial {
+      animation: rise var(--dur-slow) var(--ease-emphasized) both;
+    }
+
+    .hero-place {
+      animation-delay: 60ms;
+    }
+    .hero-time {
+      animation-delay: 140ms;
+    }
+    .hero-date {
+      animation-delay: 220ms;
+    }
+    .hero-phase {
+      animation-delay: 300ms;
+    }
+    .hero-dial {
+      animation-delay: 380ms;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 1.25rem;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  /* The second hand gets a subtle glow pulse once per second, matched to the
+     tick so the dial feels alive without demanding attention. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-seconds {
+      animation: pulse 1s steps(1, end) infinite;
+    }
+  }
+
+  @keyframes pulse {
+    0%,
+    60% {
+      opacity: 1;
+    }
+    61%,
+    100% {
+      opacity: 0.72;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .visually-hidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .skip-link {
+    position: absolute;
+    inset-block-start: -100%;
+    inset-inline-start: var(--space-sm);
+    z-index: 100;
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--r-sm);
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+
+  .skip-link:focus {
+    inset-block-start: var(--space-sm);
+  }
+}
