@@ -156,6 +156,9 @@
   /* --- Navigation ------------------------------------------------------- */
 
   .nav {
+    /* Named container so the bar's own contents respond to the bar's width,
+       not the viewport's. Dropping it into a narrow sidebar keeps working. */
+    container: nav / inline-size;
     position: sticky;
     top: 0;
     z-index: 50;
@@ -211,7 +214,8 @@
     font-weight: 600;
   }
 
-  @media (width < 40rem) {
+  /* Drop the zone name when the bar itself runs out of room. */
+  @container nav (inline-size < 34rem) {
     .nav-clock span[data-role='nav-zone'] {
       display: none;
     }
@@ -321,6 +325,7 @@
   /* --- Hero ------------------------------------------------------------- */
 
   .hero {
+    container: hero / inline-size;
     position: relative;
     margin-block-start: var(--space-lg);
     border-radius: var(--r-xl);
@@ -329,6 +334,8 @@
     border: 1px solid var(--outline);
     box-shadow: var(--shadow-lg);
     min-block-size: min(66svh, 34rem);
+    /* A container cannot query itself, so the hero's own height still keys off
+       the viewport. Everything *inside* it uses @container hero. */
     display: grid;
     grid-template-columns: 1fr;
     align-content: end;
@@ -445,18 +452,20 @@
   }
 
   .hero-dial {
-    inline-size: clamp(7rem, 16vw, 11rem);
+    inline-size: clamp(7rem, 16cqi, 11rem);
   }
 
   /* Once the dial appears, pull the scene's right edge in so the figures do not
      end up standing behind it. */
-  @media (width >= 52rem) {
+  /* Once the dial has room to appear, pull the scene's right edge in so the
+     figures do not end up standing behind it. */
+  @container hero (inline-size >= 46rem) {
     .hero-stage {
-      inset-inline-end: clamp(9rem, 18vw, 14rem);
+      inset-inline-end: clamp(9rem, 18cqi, 14rem);
     }
   }
 
-  @media (width < 52rem) {
+  @container hero (inline-size < 46rem) {
     .hero-body {
       grid-template-columns: 1fr;
       align-items: start;
@@ -464,10 +473,6 @@
 
     .hero-dial {
       display: none;
-    }
-
-    .hero {
-      min-block-size: min(70svh, 34rem);
     }
   }
 
@@ -728,7 +733,7 @@
   .card {
     display: flex;
     position: relative;
-    container-type: inline-size;
+    container: card / inline-size;
     border-radius: var(--r-lg);
     border: 1px solid var(--outline);
     background: var(--surface-1);
@@ -753,15 +758,144 @@
     position: absolute;
     inset-inline: 0;
     inset-block-start: 0;
-    block-size: 6.5rem;
+    block-size: 8.5rem;
     z-index: -1;
+    /* Fade the scene out before it reaches the readouts, so the skyline never
+       competes with the digits. */
+    mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+  }
+
+  .sky {
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+  }
+
+  /* A scrim over the top of the scene. The sky legitimately ranges from midnight
+     indigo to a bright noon cyan, so no single text colour is readable against
+     all of it; darkening the band the header sits in is what makes one colour
+     work everywhere. */
+  .card-sky::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 0;
+    block-size: 4.5rem;
+    background: linear-gradient(
+      180deg,
+      oklch(0.15 0.03 265 / 0.52) 0%,
+      oklch(0.15 0.03 265 / 0.26) 55%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  .sky-wash {
+    fill: url(#none);
+    /* Painted with a plain gradient via CSS so the whole scene recolours from
+       the same tokens the rest of the page uses. */
+    fill: var(--card-mid);
+  }
+
+  /* A layered wash reads as atmosphere rather than a flat fill: bright near the
+     horizon where the sun is, deepening toward the zenith. */
+  .card-sky::before {
+    content: '';
+    position: absolute;
+    inset: 0;
     background: linear-gradient(
       180deg,
       var(--card-top) 0%,
-      var(--card-mid) 60%,
-      transparent 100%
+      var(--card-mid) 52%,
+      var(--card-low) 100%
     );
-    opacity: 0.85;
+    z-index: -1;
+  }
+
+  .sky-star {
+    fill: oklch(1 0 0 / 0.92);
+    opacity: calc(var(--card-star, 0) * 1);
+    animation: twinkle 4.5s var(--delay, 0s) ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: calc(var(--card-star, 0) * 0.35); }
+    50% { opacity: calc(var(--card-star, 0) * 1); }
+  }
+
+  .sky-glow {
+    fill: var(--card-glow);
+    opacity: 0.3;
+  }
+
+  .sky-disc {
+    fill: var(--card-glow);
+  }
+
+  /* By day the shadow disc is hidden and the body is a sun; after dark it slides
+     over to bite a crescent out of the moon. */
+  .sky-shade {
+    fill: var(--card-top);
+    opacity: 0;
+    transform: translate(2.6px, -1.4px);
+  }
+
+  .sky.is-night .sky-shade {
+    opacity: 1;
+  }
+
+  .sky.is-night .sky-disc {
+    fill: oklch(0.95 0.03 90);
+  }
+
+  .sky.is-night .sky-glow {
+    fill: oklch(0.9 0.04 260);
+    opacity: 0.16;
+  }
+
+  .sky-cloud {
+    fill: oklch(1 0 0 / 0.5);
+    animation: drift var(--drift, 34s) var(--delay, 0s) linear infinite;
+  }
+
+  .sky.is-night .sky-cloud {
+    fill: oklch(1 0 0 / 0.14);
+  }
+
+  @keyframes drift {
+    from { transform: translateX(-30%); }
+    to { transform: translateX(130%); }
+  }
+
+  .sky-skyline {
+    fill: oklch(from var(--card-low) calc(l * 0.45) calc(c * 0.7) h);
+  }
+
+  .sky-ground {
+    fill: oklch(from var(--card-low) calc(l * 0.34) calc(c * 0.6) h);
+  }
+
+  .sky-window {
+    fill: oklch(0.86 0.15 82);
+    opacity: 0;
+  }
+
+  /* Windows only light up once it is actually dark in that city. */
+  .sky.is-night .sky-window {
+    animation: lamp 7s var(--delay, 0s) ease-in-out infinite;
+  }
+
+  @keyframes lamp {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.95; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sky-cloud,
+    .sky-star,
+    .sky-window {
+      animation: none;
+    }
   }
 
   .card-body {
@@ -861,7 +995,7 @@
 
   /* Container queries let a card adapt to the column it landed in rather than to
      the viewport — the same card works in a 4-up grid and in a sidebar. */
-  @container (inline-size < 15rem) {
+  @container card (inline-size < 15rem) {
     .card-dial {
       display: none;
     }

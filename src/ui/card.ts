@@ -9,7 +9,7 @@
 
 import type { City } from '../data/cities';
 import { createDial } from './analog';
-import { skyPalette } from '../core/sky';
+import { createCardSky } from './cardsky';
 import { solarSnapshot, skyPhase, PHASE_LABEL } from '../core/solar';
 import {
   zonedParts,
@@ -33,7 +33,7 @@ export function createCard(city: City, onRemove: (city: City) => void): Card {
   el.className = 'card reveal';
 
   el.innerHTML = `
-    <div class="card-sky"></div>
+    <div class="card-sky" data-role="sky"></div>
     <div class="card-body">
       <div class="card-head">
         <div>
@@ -80,7 +80,9 @@ export function createCard(city: City, onRemove: (city: City) => void): Card {
   const zoneEl = q('zone');
   const daymark = q('daymark');
   const suntimes = q('suntimes');
-  const sky = el.querySelector<HTMLElement>('.card-sky')!;
+  const skyHost = q('sky');
+  const cardSky = createCardSky(city);
+  skyHost.append(cardSky.el);
 
   const dial = createDial({ size: 100, detailed: false });
   q('dial').append(dial.el);
@@ -100,9 +102,7 @@ export function createCard(city: City, onRemove: (city: City) => void): Card {
     dial.update(instant, city.zone);
 
     const sun = solarSnapshot(instant, city.lat, city.lon);
-    const palette = skyPalette(sun.elevation);
-    sky.style.setProperty('--card-top', palette.top);
-    sky.style.setProperty('--card-mid', palette.mid);
+    cardSky.update(sun, instant);
 
     const offset = offsetMinutes(instant, city.zone);
     const abbreviation = zoneAbbreviation(instant, city.zone);

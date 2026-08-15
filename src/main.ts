@@ -83,20 +83,35 @@ q('hero-dial').append(heroDial.el);
  * across a sunrise swaps the scene too.
  */
 const HERO_SCENES = {
-  dawn: { src: 'lottie/dawn.json', label: 'A person stretching as the sun rises' },
-  midday: { src: 'lottie/midday.json', label: 'People walking on a bright afternoon' },
-  night: { src: 'lottie/night.json', label: 'A person working at a desk at night' },
+  dawn: { src: 'lottie/dawn.json', label: 'Someone waking as the sun comes up' },
+  midday: { src: 'lottie/midday.json', label: 'People out walking under a bright sky' },
+  dusk: { src: 'lottie/dusk.json', label: 'People heading home as the sun sets' },
+  night: { src: 'lottie/night.json', label: 'Someone still at a desk after dark' },
 } as const;
 
 type SceneKey = keyof typeof HERO_SCENES;
 
-function sceneForElevation(elevation: number): SceneKey {
+/**
+ * Choose the scene from the sun's height *and* its direction of travel.
+ *
+ * Elevation alone cannot tell dawn from dusk — the sun sits at the same angle
+ * on both sides of noon. Sampling the elevation ten minutes ahead gives the
+ * sign of the change, which is what separates someone waking up from someone
+ * walking home.
+ */
+function sceneForSun(instant: Date, elevation: number): SceneKey {
   if (elevation < -6) return 'night';
-  if (elevation < 12) return 'dawn';
-  return 'midday';
+  if (elevation >= 14) return 'midday';
+
+  const later = solarSnapshot(
+    new Date(instant.getTime() + 10 * 60_000),
+    homeCity.lat,
+    homeCity.lon,
+  );
+  return later.elevation > elevation ? 'dawn' : 'dusk';
 }
 
-let heroScene: SceneKey = sceneForElevation(0);
+let heroScene: SceneKey = 'midday';
 
 const heroStage = createStage({
   src: HERO_SCENES[heroScene].src,
@@ -227,7 +242,7 @@ function renderSlow(instant: Date): void {
   heroPhase.textContent = PHASE_LABEL[phase];
 
   // Swap the hero scene only when the sun crosses a boundary, never per frame.
-  const wantedScene = sceneForElevation(sun.elevation);
+  const wantedScene = sceneForSun(instant, sun.elevation);
   if (wantedScene !== heroScene) {
     heroScene = wantedScene;
     heroStage.setSource(HERO_SCENES[wantedScene].src, HERO_SCENES[wantedScene].label);

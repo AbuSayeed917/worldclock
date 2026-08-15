@@ -42,6 +42,15 @@ const ENTRIES: RailEntry[] = [
     gradient: ['oklch(0.6 0.14 232)', 'oklch(0.44 0.12 200)'],
   },
   {
+    eyebrow: 'Last light',
+    title: 'The day is handing over',
+    copy: 'Sunset is a line moving west at the same speed sunrise is. This is where it has got to.',
+    animation: 'lottie/dusk.json',
+    label: 'People heading home as the sun sets',
+    targetHour: 19,
+    gradient: ['oklch(0.46 0.15 32)', 'oklch(0.3 0.12 315)'],
+  },
+  {
     eyebrow: 'Long after dark',
     title: 'Still working, on the other side',
     copy: 'A third of the planet is asleep while the rest carries on. The map above shows exactly which third.',
