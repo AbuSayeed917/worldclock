@@ -10,6 +10,8 @@
 import type { City } from '../data/cities';
 import { createDial } from './analog';
 import { createCardSky } from './cardsky';
+import { createStage, type Stage } from './lottie-stage';
+import { conditionFor, sourceFor, labelFor, type SkyCondition } from './weather';
 import { solarSnapshot, skyPhase, PHASE_LABEL } from '../core/solar';
 import {
   zonedParts,
@@ -34,6 +36,7 @@ export function createCard(city: City, onRemove: (city: City) => void): Card {
 
   el.innerHTML = `
     <div class="card-sky" data-role="sky"></div>
+    <div class="card-weather" data-role="weather"></div>
     <div class="card-body">
       <div class="card-head">
         <div>
@@ -84,6 +87,12 @@ export function createCard(city: City, onRemove: (city: City) => void): Card {
   const cardSky = createCardSky(city);
   skyHost.append(cardSky.el);
 
+  // Professional stock Lottie, mounted lazily. Which one is showing is decided
+  // by the solar model, so the moon only appears when it is actually dark here.
+  let condition: SkyCondition | null = null;
+  let weather: Stage | null = null;
+  const weatherHost = q('weather');
+
   const dial = createDial({ size: 100, detailed: false });
   q('dial').append(dial.el);
 
@@ -103,6 +112,18 @@ export function createCard(city: City, onRemove: (city: City) => void): Card {
 
     const sun = solarSnapshot(instant, city.lat, city.lon);
     cardSky.update(sun, instant);
+
+    const wanted = conditionFor(city, sun.isDay);
+    if (wanted !== condition) {
+      condition = wanted;
+      if (weather) {
+        weather.setSource(sourceFor(wanted), labelFor(wanted));
+      } else {
+        weather = createStage({ src: sourceFor(wanted), label: labelFor(wanted) });
+        weatherHost.append(weather.el);
+      }
+      weatherHost.title = labelFor(wanted);
+    }
 
     const offset = offsetMinutes(instant, city.zone);
     const abbreviation = zoneAbbreviation(instant, city.zone);

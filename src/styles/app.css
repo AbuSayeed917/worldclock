@@ -109,6 +109,7 @@
   }
 
   .section-head {
+    container-type: inline-size;
     display: flex;
     align-items: end;
     justify-content: space-between;
@@ -823,6 +824,17 @@
     50% { opacity: calc(var(--card-star, 0) * 1); }
   }
 
+  /* The vendored animation is now the sun/moon in the sky, so the painted disc
+     is hidden to avoid two of them. Position along the day is still shown, by
+     the dotted sun arc lower down the card. */
+  .card:has(.card-weather .stage.is-ready) .sky-body {
+    opacity: 0;
+  }
+
+  .sky-body {
+    transition: opacity var(--dur-slow) var(--ease-emphasized);
+  }
+
   .sky-glow {
     fill: var(--card-glow);
     opacity: 0.3;
@@ -896,6 +908,31 @@
     .sky-window {
       animation: none;
     }
+  }
+
+  /* The vendored sky animation. It sits above the painted scene but below the
+     card's own controls, so the remove button stays clickable over it. */
+  .card-weather {
+    position: absolute;
+    inset-block-start: 0.35rem;
+    inset-inline-end: 2.4rem;
+    inline-size: 3.6rem;
+    block-size: 3.6rem;
+    z-index: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 3px 8px oklch(0 0 0 / 0.4));
+  }
+
+  /* These are stock loops with their own palettes, so they are toned down a
+     little to sit inside this page rather than shout over it. */
+  .card-weather .stage svg {
+    opacity: 0.94;
+  }
+
+  /* The stock files ship their own artwork; the generic CSS stand-in would only
+     show a second sun behind them. */
+  .card-weather .stage-fallback {
+    display: none;
   }
 
   .card-body {
@@ -1572,5 +1609,21 @@
 
   .skip-link:focus {
     inset-block-start: var(--space-sm);
+  }
+}
+
+@layer components {
+  /* Decorative artwork alongside a section heading. Hidden on narrow layouts,
+     where the heading needs the whole width. */
+  .section-art {
+    inline-size: clamp(9rem, 22cqi, 15rem);
+    aspect-ratio: 3 / 2;
+    flex: none;
+  }
+
+  @container (inline-size < 44rem) {
+    .section-art {
+      display: none;
+    }
   }
 }

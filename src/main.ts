@@ -141,6 +141,15 @@ q('strip').append(terminator.el);
 
 const rail = createRail(q('rail'));
 
+// A vendored illustration for the planning section. Decorative, lazily mounted,
+// and the one place a stock loop fits without needing to know anything.
+const converterArt = createStage({
+  src: 'lottie/vendor/world-people.json',
+  label: 'Two people meeting across a globe',
+  fit: 'xMidYMid meet',
+});
+q('converter-art').append(converterArt.el);
+
 const converter = createConverter({
   root: document.querySelector<HTMLElement>('.converter')!,
   initialCityId: homeCity.id,
