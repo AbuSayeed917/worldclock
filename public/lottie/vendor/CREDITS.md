@@ -15,28 +15,25 @@ adopted.
 | `sky-moon.json` | https://assets6.lottiefiles.com/packages/lf20_btkj8xsi.json | moon | 28 KB | Night card sky |
 | `world-people.json` | https://assets5.lottiefiles.com/packages/lf20_slipwrv0.json | Businessmen Handshake | 128 KB | Planning section artwork |
 
-## Licensing — read before shipping commercially
+## Licensing
 
-**These carry LottieFiles' free licence, which is per-creator and generally
-requires attribution to the individual author.** The JSON files do not record who
-made them, and LottieFiles' site refuses automated requests, so the original
-creator could not be identified from here.
+Meridian is a personal project, which is exactly the use LottieFiles' free tier
+is meant for. These animations carry that free licence; the source URL for each
+is recorded above so any one of them stays traceable to its origin.
 
-What that means in practice:
+Two notes for the future, not blockers now:
 
-- For a personal or portfolio project this is the normal way these assets get
-  used, and the source URLs above make each one traceable.
-- **Before any commercial use**, open each source URL, find the creator, and
-  either credit them here or replace the file. LottieFiles' terms are at
-  https://lottiefiles.com/page/license.
-- If you would rather carry no third-party licence at all, delete this folder.
-  `src/ui/weather.ts` is the only consumer for the sky set, and
-  `src/ui/cardsky.ts` already paints its own sun and moon — removing the vendored
-  icons makes that painted body reappear automatically, because the CSS hides it
-  with `:has(.card-weather .stage.is-ready)`.
+- The free licence is **per-creator and generally expects attribution**. The JSON
+  files do not record an author and LottieFiles refuses automated requests, so
+  the creators could not be identified from here. If this ever becomes something
+  commercial, open the source URLs, credit the authors, and update this table.
+- Removing them cleanly is one step: delete this folder. `src/ui/weather.ts` is
+  the only consumer of the sky set, and `src/ui/cardsky.ts` already paints its
+  own sun and moon — the painted body reappears on its own, because the CSS only
+  hides it with `:has(.card-weather .stage.is-ready)`.
 
-By contrast, the character artwork in `assets/peeps/` is **CC0 (public domain)**
-and carries no such obligation. See [../CREDITS.md](../CREDITS.md).
+The character artwork in `assets/peeps/` is **CC0 (public domain)** and carries
+no obligation at all. See [../CREDITS.md](../CREDITS.md).
 
 ## How they are chosen
 
