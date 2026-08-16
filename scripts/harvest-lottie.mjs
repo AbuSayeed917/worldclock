@@ -20,18 +20,24 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '.shots/harvest');
 mkdirSync(OUT, { recursive: true });
 
+/**
+ * The search net.
+ *
+ * Two axes: the CDN host (LottieFiles shards assets across assets1..assets10,
+ * and each shard is indexed separately) and the file type doing the embedding.
+ * Widening both is what turns a thin sweep into a usable corpus — the first
+ * pass only looked at HTML on a few shards.
+ */
+const HOSTS = ['assets', ...Array.from({ length: 10 }, (_, i) => `assets${i + 1}`)];
+const LANGS = ['html', 'javascript', 'jsx', 'typescript', 'vue', 'markdown', 'json'];
+
 const QUERIES = [
-  'assets.lottiefiles.com/packages/lf20 language:html',
-  'assets1.lottiefiles.com/packages language:html',
-  'assets2.lottiefiles.com/packages language:html',
-  'assets3.lottiefiles.com/packages language:html',
-  'assets4.lottiefiles.com/packages language:html',
-  'assets5.lottiefiles.com/packages language:html',
-  'assets9.lottiefiles.com/packages language:html',
-  'assets10.lottiefiles.com/packages language:html',
-  'lottie.host json language:html',
-  'assets.lottiefiles.com/packages language:javascript',
-  'assets.lottiefiles.com/packages language:jsx',
+  ...HOSTS.map((h) => `${h}.lottiefiles.com/packages language:html`),
+  ...HOSTS.slice(0, 6).map((h) => `${h}.lottiefiles.com/private_files language:html`),
+  ...LANGS.map((l) => `assets.lottiefiles.com/packages language:${l}`),
+  ...LANGS.slice(0, 4).map((l) => `lottie.host json language:${l}`),
+  'lottiefiles.com/packages lottie language:svelte',
+  'lottie.host .lottie language:html',
 ];
 
 const URL_RE =
@@ -49,20 +55,31 @@ async function gh(args) {
 console.log('searching GitHub for embedded Lottie URLs…');
 
 const files = new Map();
+const PAGES = Number(process.env.PAGES ?? 2);
+
 for (const q of QUERIES) {
-  const res = await gh(['api', '-X', 'GET', 'search/code', '-f', `q=${q}`, '-F', 'per_page=30']);
-  for (const item of res?.items ?? []) {
-    const key = `${item.repository.full_name}|${item.path}`;
-    if (!files.has(key)) {
-      files.set(key, {
-        repo: item.repository.full_name,
-        path: item.path,
-        branch: item.repository.default_branch || 'main',
-      });
+  for (let page = 1; page <= PAGES; page++) {
+    const res = await gh([
+      'api', '-X', 'GET', 'search/code',
+      '-f', `q=${q}`, '-F', 'per_page=50', '-F', `page=${page}`,
+    ]);
+    const items = res?.items ?? [];
+    for (const item of items) {
+      const key = `${item.repository.full_name}|${item.path}`;
+      if (!files.has(key)) {
+        files.set(key, {
+          repo: item.repository.full_name,
+          path: item.path,
+          branch: item.repository.default_branch || 'main',
+        });
+      }
     }
+    if (items.length < 50) break;
+    // Code search allows roughly ten requests a minute for an authenticated
+    // user; going faster just earns empty responses.
+    await new Promise((r) => setTimeout(r, 6500));
   }
-  // GitHub's code search endpoint is heavily rate limited.
-  await new Promise((r) => setTimeout(r, 2500));
+  await new Promise((r) => setTimeout(r, 6500));
 }
 
 console.log(`  ${files.size} source files to scan`);
@@ -99,8 +116,14 @@ if (!urls.size) {
 
 console.log('downloading and inspecting…\n');
 
+const already = new Set(
+  (await import('node:fs')).readdirSync(OUT).filter((f) => f.endsWith('.json')),
+);
+
 const results = [];
 for (const url of urls) {
+  const outName = url.split('/').pop();
+  if (already.has(outName)) continue;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
     if (!res.ok) {

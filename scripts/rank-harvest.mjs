@@ -13,6 +13,24 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIR = join(ROOT, '.shots/harvest');
 
+/**
+ * Focused vocabularies. `node scripts/rank-harvest.mjs clock` scores only for
+ * timekeeping subjects; `earth` for the planet; omitting it uses the general
+ * world-clock vocabulary.
+ */
+const FOCUS = {
+  clock: {
+    clock: 14, watch: 12, hourglass: 12, alarm: 10, timer: 10, time: 9,
+    stopwatch: 12, pendulum: 12, dial: 8, hand: 4, tick: 6, minute: 6,
+    hour: 8, second: 4, schedule: 7, calendar: 6, deadline: 6, countdown: 10,
+  },
+  earth: {
+    earth: 15, globe: 15, planet: 12, world: 12, map: 9, atlas: 8,
+    continent: 10, orbit: 9, satellite: 8, space: 6, sphere: 8,
+    country: 6, travel: 6, international: 8, global: 9, longitude: 12,
+  },
+};
+
 /** Weighted vocabulary. Higher weight means more central to the brief. */
 const TOPICS = {
   clock: 10, watch: 8, time: 8, hourglass: 7, alarm: 6, timer: 6,
@@ -25,6 +43,8 @@ const TOPICS = {
   meeting: 6, calendar: 5, schedule: 5,
 };
 
+const focusArg = process.argv[2];
+const VOCAB = FOCUS[focusArg] ?? TOPICS;
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json') && !f.startsWith('_'));
 
 const scored = [];
@@ -46,7 +66,7 @@ for (const file of files) {
 
   let score = 0;
   const hits = [];
-  for (const [word, weight] of Object.entries(TOPICS)) {
+  for (const [word, weight] of Object.entries(VOCAB)) {
     // Word-boundary match so "sun" does not fire on "sunglasses".
     const re = new RegExp(`\\b${word}`, 'g');
     const n = (haystack.match(re) ?? []).length;
@@ -75,7 +95,7 @@ for (const file of files) {
 
 scored.sort((a, b) => b.score - a.score);
 
-console.log(`ranked ${scored.length} harvested animations\n`);
+console.log(`ranked ${scored.length} animations` + (focusArg ? ` — focus: ${focusArg}` : '') + '\n');
 for (const s of scored.slice(0, 28)) {
   if (s.score <= 0) break;
   console.log(

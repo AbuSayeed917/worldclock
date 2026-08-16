@@ -14,6 +14,10 @@ adopted.
 | `sky-rain.json` | https://assets10.lottiefiles.com/private_files/lf30_orqfuyox.json | rainy icon | 23 KB | Daytime card sky |
 | `sky-moon.json` | https://assets6.lottiefiles.com/packages/lf20_btkj8xsi.json | moon | 28 KB | Night card sky |
 | `world-people.json` | https://assets5.lottiefiles.com/packages/lf20_slipwrv0.json | Businessmen Handshake | 128 KB | Planning section artwork |
+| `rail-earth.json` | https://lottie.host/7af41bf4-6c86-47b0-bb41-038a7938658d/A3FwSmmEWU.json | earth | 62 KB | Rail: one rotation |
+| `rail-clock.json` | https://assets.lottiefiles.com/packages/lf20_nv5aXa.json | Clock | 3 KB | Rail: one reference |
+| `rail-satellite.json` | https://assets2.lottiefiles.com/packages/lf20_s3PG4r.json | Space Lottie | 77 KB | Rail: where time comes from |
+| `rail-alarm.json` | https://assets.lottiefiles.com/packages/lf20_iv0UOb.json | Live waiting Animation | 48 KB | Rail: right now |
 
 ## Licensing
 
@@ -35,7 +39,16 @@ Two notes for the future, not blockers now:
 The character artwork in `assets/peeps/` is **CC0 (public domain)** and carries
 no obligation at all. See [../CREDITS.md](../CREDITS.md).
 
+## Sizing
+
+Each file carries its own padding inside its viewBox, so an identical CSS box
+renders them at wildly different apparent sizes — the clock filled its frame
+while the earth sat as a dot in the middle. `rail.ts` carries a per-entry
+`artScale` to correct for that. It is a property of the source files, not a
+design preference, which is why it lives beside the file references.
+
 ## How they are chosen
+
 
 The animations are stock loops and know nothing on their own. `src/ui/weather.ts`
 supplies the meaning:

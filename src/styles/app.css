@@ -1200,13 +1200,16 @@
      card's own gradient background and render it invisible. */
   .rail-stage {
     position: absolute;
-    inset-block-end: 0;
-    inset-inline: 0;
-    block-size: 68%;
+    inset-block-end: 13%;
+    inset-inline-end: 1%;
+    inline-size: 46%;
+    block-size: 42%;
     z-index: 0;
-    opacity: 0.97;
+    opacity: 0.98;
     pointer-events: none;
-    mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 100%);
+    scale: var(--art-scale, 1);
+    transform-origin: 100% 100%;
+    filter: drop-shadow(0 8px 24px oklch(0 0 0 / 0.32));
   }
 
   /* Lift the copy above the animation. Without this the stage, being the only
@@ -1218,13 +1221,17 @@
 
   /* A scrim behind the text block only, so white copy stays legible over
      whatever part of the scene ends up underneath it. */
-  .rail-card > :not(.rail-stage):last-child::before {
-    content: '';
-    position: absolute;
-    inset: -40% -30% -60% -30%;
-    z-index: -1;
-    background: radial-gradient(60% 100% at 20% 60%, oklch(0 0 0 / 0.45), transparent 70%);
-    pointer-events: none;
+  .rail-copy {
+    /* Keep the copy clear of the artwork sitting to its right. */
+    max-inline-size: 23ch;
+  }
+
+  .rail-note {
+    margin-inline-start: 0.5rem;
+    padding-inline-start: 0.5rem;
+    border-inline-start: 1px solid oklch(1 0 0 / 0.28);
+    opacity: 0.78;
+    letter-spacing: 0.04em;
   }
 
   .rail-eyebrow {
