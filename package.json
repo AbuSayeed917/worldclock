@@ -17,6 +17,7 @@
     "vitest": "^2.1.4"
   },
   "dependencies": {
+    "@rive-app/canvas": "^2.40.1",
     "lottie-web": "^5.12.2"
   }
 }
