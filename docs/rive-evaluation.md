@@ -62,5 +62,6 @@ serves them over HTTP because Rive fetches its wasm at load time and an
 
 - A `.riv` built for this site with a numeric input for solar elevation. Then one
   file could replace the sky, sun position and star fade at once, and the state
-  machine would be doing work no Lottie file can.
+  machine would be doing work no Lottie file can. **That file is specified in
+  [rive-sky-spec.md](rive-sky-spec.md)** — it is the agreed next step.
 - Rive shipping a materially smaller wasm build.
