@@ -1634,3 +1634,24 @@
     }
   }
 }
+
+@layer components {
+  /* The Rive sky sits over the painted one and only appears once it has loaded
+     and passed the input contract, so a missing or rejected file leaves the SVG
+     sky visible rather than a hole. */
+  .sky-rive {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+  }
+
+  .card.has-rive-sky .sky {
+    opacity: 0;
+  }
+
+  .card.has-rive-sky .sky-rive {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "sky": false,
+  "note": "Flipped to true by `npm run rive:enable` once public/rive/sky.riv exists. See docs/rive-sky-spec.md."
+}

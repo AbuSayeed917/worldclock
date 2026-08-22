@@ -10,9 +10,10 @@
 import type { City } from '../data/cities';
 import { createDial } from './analog';
 import { createCardSky } from './cardsky';
+import { createRiveSky, type RiveSky } from './rive-sky';
 import { createStage, type Stage } from './lottie-stage';
 import { conditionFor, sourceFor, labelFor, type SkyCondition } from './weather';
-import { solarSnapshot, skyPhase, PHASE_LABEL } from '../core/solar';
+import { solarSnapshot, skyPhase, PHASE_LABEL, type SolarSnapshot } from '../core/solar';
 import {
   zonedParts,
   offsetMinutes,
@@ -87,6 +88,21 @@ export function createCard(city: City, onRemove: (city: City) => void): Card {
   const cardSky = createCardSky(city);
   skyHost.append(cardSky.el);
 
+  // If the custom sky.riv is present it takes over the painted sky, driven by
+  // the same solar snapshot. Absent — which is the case today — this resolves
+  // to null without downloading the Rive runtime at all.
+  let riveSky: RiveSky | null = null;
+  let lastSun: SolarSnapshot | null = null;
+  let lastInstant: Date | null = null;
+
+  void createRiveSky().then((sky) => {
+    if (!sky) return;
+    riveSky = sky;
+    skyHost.append(sky.el);
+    el.classList.add('has-rive-sky');
+    if (lastSun && lastInstant) sky.update(lastSun, lastInstant);
+  });
+
   // Professional stock Lottie, mounted lazily. Which one is showing is decided
   // by the solar model, so the moon only appears when it is actually dark here.
   let condition: SkyCondition | null = null;
@@ -111,7 +127,12 @@ export function createCard(city: City, onRemove: (city: City) => void): Card {
     dial.update(instant, city.zone);
 
     const sun = solarSnapshot(instant, city.lat, city.lon);
+    lastSun = sun;
+    lastInstant = instant;
+    // The SVG sky keeps running underneath so a late-loading or failed Rive
+    // file never leaves a blank card.
     cardSky.update(sun, instant);
+    riveSky?.update(sun, instant);
 
     const wanted = conditionFor(city, sun.isDay);
     if (wanted !== condition) {

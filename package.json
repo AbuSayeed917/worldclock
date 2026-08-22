@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "rive:enable": "node scripts/enable-rive.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
