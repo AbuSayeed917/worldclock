@@ -386,25 +386,97 @@
 
   /* Sits at z-index 0, not -1. A negative z-index would drop it behind the
      hero's own painted background and behind the ::after scrim; at 0 it layers
-     above the sky and below .hero-body, which is what the composition wants. */
+     above the sky and below .hero-body.
+
+     Note this puts the figures ABOVE the .hero::after ground scrim, so that
+     scrim cannot protect the headline from them — it only softens raw sky.
+     Type legibility is therefore .hero-body's own job; see its ::before. */
   .hero-stage {
     position: absolute;
     inset-block-end: 0;
     inset-inline: 0;
-    block-size: 76%;
+    /* A horizon band, not a full-height scene. At 76% the figures stood at eye
+       level with the clock and competed with it; kept low they read as ground,
+       which is where people actually are. */
+    block-size: 44%;
     z-index: 0;
-    opacity: 0.94;
+    opacity: 0.55;
     pointer-events: none;
-    mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 100%);
+    /* Slightly desaturated so the illustration's flat brand colours stop
+       out-shouting the sky, which is the only thing that should be vivid. */
+    filter: saturate(0.8);
+    /* Steeper than the old 22%: the band is shorter now, so the fade has to
+       occupy more of it to still read as emerging from haze. */
+    mask-image: linear-gradient(180deg, transparent 0%, #000 38%, #000 100%);
   }
 
+  /* Atmospheric perspective — the haze that makes the figures sit *in* the
+     scene's light rather than on top of it. Because it is the live --sky-low it
+     warms at golden hour and goes blue at night along with everything else.
+
+     It lives on .hero, not inside .hero-stage, and that placement is the whole
+     point: the container query below insets the stage's right edge to clear the
+     dial, so a wash parented to the stage stops at that inset and leaves a hard
+     vertical seam down the hero. Spanning the full width also makes it read as
+     one horizon band instead of a patch behind the people.
+
+     z-index 1 puts it above the figures (0) and below .hero-body (2). */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    block-size: 44%;
+    z-index: 1;
+    background: linear-gradient(180deg, transparent 0%, var(--sky-low) 100%);
+    opacity: 0.3;
+    pointer-events: none;
+    transition: background var(--dur-sky) var(--ease-emphasized);
+  }
+
+  /* z-index + isolation are load-bearing: they lift the whole text block above
+     the figures (0) and the horizon haze (1), and open a stacking context, which
+     is what lets the ::before scrim below sit above both but behind the type.
+     Without the isolation, a z-index:-1 pseudo would escape and land behind the
+     figures — exactly the bug .hero::after already has. */
   .hero-body {
     position: relative;
+    z-index: 2;
+    isolation: isolate;
     padding: var(--space-xl) var(--space-lg);
     display: grid;
     gap: var(--space-lg);
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
+  }
+
+  /* The scrim that actually guarantees contrast. .hero::after cannot do this
+     job because the figures paint over it. Extending past the block start
+     catches the tall clock glyphs, which otherwise reach above the gradient. */
+  .hero-body::before {
+    content: '';
+    position: absolute;
+    inset-block: -30% 0;
+    inset-inline: 0;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      oklch(from var(--ink) l c h / 0.5) 42%,
+      oklch(from var(--ink) l c h / 0.85) 100%
+    );
+    pointer-events: none;
+    transition: background var(--dur-sky) var(--ease-emphasized);
+  }
+
+  /* The phase chip used to sit inline with the place name, which put it exactly
+     where a figure's head lands. Its own line costs one row and removes the
+     collision outright. */
+  .hero-status {
+    margin-block-start: var(--space-2xs);
+    display: flex;
+    gap: var(--space-2xs);
+    flex-wrap: wrap;
   }
 
   .hero-place {
