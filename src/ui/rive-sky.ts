@@ -78,9 +78,9 @@ export function riveSkyAvailable(): Promise<boolean> {
 export async function createRiveSky(): Promise<RiveSky | null> {
   if (!(await riveSkyAvailable())) return null;
 
-  let rive: typeof import('@rive-app/canvas');
+  let rive: typeof import('@rive-app/canvas-lite');
   try {
-    rive = await import('@rive-app/canvas');
+    rive = await import('@rive-app/canvas-lite');
   } catch {
     return null;
   }

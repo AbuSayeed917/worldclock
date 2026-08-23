@@ -5,5 +5,3 @@ dist/
 *.local
 .vite/
 
-# Copied from node_modules by `npm run rive:enable`, not source
-public/rive/rive.wasm

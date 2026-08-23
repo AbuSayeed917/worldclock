@@ -1655,3 +1655,53 @@
     opacity: 1;
   }
 }
+
+@layer components {
+  /* --- Rive stages ------------------------------------------------------ */
+
+  /* Rive draws to a canvas rather than an SVG tree, so unlike the Lottie stage
+     there is nothing to inherit sizing from — the canvas must be told. */
+  :where(.rive-stage) {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+  }
+
+  .rive-stage canvas {
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+  }
+
+  /* Fade in on load; a canvas pops into existence otherwise. */
+  .rive-stage {
+    opacity: 0;
+    transition: opacity var(--dur-slow) var(--ease-emphasized);
+  }
+
+  .rive-stage.is-ready {
+    opacity: 1;
+  }
+
+  /* A failed load leaves nothing rather than an empty box, since every Rive
+     placement here is decorative. */
+  .rive-stage.is-failed {
+    display: none;
+  }
+
+  /* The instrument dial beside the terminator heading. */
+  .section-dial {
+    inline-size: clamp(3.5rem, 9cqi, 5.5rem);
+    aspect-ratio: 1;
+    flex: none;
+    align-self: center;
+    opacity: 0.85;
+  }
+
+  @container (inline-size < 38rem) {
+    .section-dial {
+      display: none;
+    }
+  }
+}

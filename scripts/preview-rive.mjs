@@ -18,6 +18,10 @@ const OUT = join(ROOT, '.shots');
 mkdirSync(OUT, { recursive: true });
 
 const DIR = process.argv[2] ?? '.shots/riv';
+// canvas-lite renders through the browser's own canvas rather than Rive's
+// bundled renderer; its wasm is less than half the size, so it is worth
+// confirming each file still draws correctly under it.
+const PKG = process.env.RIVE_PKG ?? 'canvas';
 const files = readdirSync(join(ROOT, DIR)).filter((f) => f.endsWith('.riv'));
 if (!files.length) {
   console.error(`no .riv files in ${DIR}`);
@@ -62,12 +66,12 @@ await page.setContent(`
     figcaption{text-align:center;padding:4px}
   </style><div id="row" style="display:contents"></div>
 `);
-await page.addScriptTag({ url: `http://localhost:${port}/node_modules/@rive-app/canvas/rive.js` });
+await page.addScriptTag({ url: `http://localhost:${port}/node_modules/@rive-app/${PKG}/rive.js` });
 
 const report = await page.evaluate(
-  async ({ files, dir, port, cell }) => {
+  async ({ files, dir, port, cell, PKG }) => {
     const rive = window.rive;
-    rive.RuntimeLoader.setWasmUrl(`http://localhost:${port}/node_modules/@rive-app/canvas/rive.wasm`);
+    rive.RuntimeLoader.setWasmUrl(`http://localhost:${port}/node_modules/@rive-app/${PKG}/rive.wasm`);
     const row = document.getElementById('row');
     const out = [];
 
@@ -111,7 +115,7 @@ const report = await page.evaluate(
     await new Promise((r) => setTimeout(r, 1500));
     return out;
   },
-  { files, dir: DIR, port, cell: CELL },
+  { files, dir: DIR, port, cell: CELL, PKG },
 );
 
 await page.waitForTimeout(1200);

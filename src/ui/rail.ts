@@ -12,6 +12,7 @@
 
 import { CITIES, cityById, type City } from '../data/cities';
 import { createStage, type Stage } from './lottie-stage';
+import { createRiveStage } from './rive-stage';
 import { solarSnapshot } from '../core/solar';
 import { zonedParts, pad2 } from '../core/time';
 
@@ -65,12 +66,12 @@ const ENTRIES: RailEntry[] = [
     eyebrow: 'Where it comes from',
     title: 'The time arrives from orbit',
     copy: 'UTC is kept by atomic clocks and broadcast from orbit. Your phone checks in constantly and never mentions it.',
-    animation: 'lottie/vendor/rail-satellite.json',
-    label: 'A satellite in orbit',
+    animation: 'rive/planet.riv',
+    label: 'A planet turning against the stars',
     anchor: { kind: 'city', id: 'tokyo' },
     gradient: ['oklch(0.32 0.11 276)', 'oklch(0.2 0.08 262)'],
     note: 'same signal, different offset',
-    artScale: 1.35,
+    artScale: 1.15,
   },
   {
     eyebrow: 'Right now',
@@ -91,7 +92,7 @@ export interface Rail {
 }
 
 export function createRail(root: HTMLElement): Rail {
-  const stages: Stage[] = [];
+  const stages: Array<Stage | { destroy(): void }> = [];
   const cards: Array<{ entry: RailEntry; timeEl: HTMLElement; cityEl: HTMLElement }> = [];
 
   for (const entry of ENTRIES) {
@@ -114,13 +115,17 @@ export function createRail(root: HTMLElement): Rail {
       </p>
     `;
 
-    const stage = createStage({
-      src: entry.animation,
-      label: entry.label,
-      // These are square icon-style pieces, so they are fitted whole rather
-      // than cropped from the ground up like the illustrated scenes were.
-      fit: 'xMidYMid meet',
-    });
+    // Entries name either a .riv or a .json; the two stages share a shape so
+    // the rail does not care which.
+    const stage = entry.animation.endsWith('.riv')
+      ? createRiveStage({ src: entry.animation, label: entry.label, fit: 'contain' })
+      : createStage({
+          // Square icon-style pieces, fitted whole rather than cropped from
+          // the ground up like the illustrated scenes were.
+          src: entry.animation,
+          label: entry.label,
+          fit: 'xMidYMid meet',
+        });
     stage.el.classList.add('rail-stage');
     card.prepend(stage.el);
     stages.push(stage);

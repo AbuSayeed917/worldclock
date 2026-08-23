@@ -33,6 +33,7 @@ import { createSearch } from './ui/search';
 import { createConverter } from './ui/converter';
 import { createRail } from './ui/rail';
 import { createStage } from './ui/lottie-stage';
+import { createRiveStage } from './ui/rive-stage';
 
 const q = <T extends Element = HTMLElement>(role: string): T =>
   document.querySelector<T>(`[data-role="${role}"]`)!;
@@ -143,12 +144,20 @@ const rail = createRail(q('rail'));
 
 // A vendored illustration for the planning section. Decorative, lazily mounted,
 // and the one place a stock loop fits without needing to know anything.
-const converterArt = createStage({
-  src: 'lottie/vendor/world-people.json',
-  label: 'Two people meeting across a globe',
-  fit: 'xMidYMid meet',
+const converterArt = createRiveStage({
+  src: 'rive/orbital.riv',
+  label: 'Concentric rings turning at different rates',
+  fit: 'contain',
 });
 q('converter-art').append(converterArt.el);
+
+// A dial next to the terminator heading. Decorative, but it belongs to the same
+// family of instruments as the map and the clock faces.
+const stripDial = createRiveStage({
+  src: 'rive/dial.riv',
+  fit: 'contain',
+});
+q('strip-dial').append(stripDial.el);
 
 const converter = createConverter({
   root: document.querySelector<HTMLElement>('.converter')!,
